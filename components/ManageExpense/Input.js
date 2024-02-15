@@ -13,6 +13,7 @@ function Input({ label, textInputConfig, style, invalid }){
         inputStyles.push(styles.inputMultiLine)
     }
 
+    
     return <View style={[styles.inputContainer, style]}>
         <Text style={[styles.label, invalid && styles.invalidLable]}>{label}</Text>
         <TextInput style={inputStyles} {...textInputConfig} />
