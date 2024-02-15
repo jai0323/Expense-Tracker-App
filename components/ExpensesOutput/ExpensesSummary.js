@@ -10,7 +10,7 @@ function ExpensesSummary({periodName, expenses}){
 
     return <View style={styles.container}>
         <Text style={styles.period}>{periodName}</Text>
-        <Text style={styles.sum}>${expensesSum.toFixed(2)}</Text>
+        <Text style={styles.sum}>₹ {expensesSum.toFixed(2)}</Text>
     </View>
 }
 
