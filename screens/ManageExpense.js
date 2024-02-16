@@ -5,6 +5,7 @@ import { GlobalStyles } from "../constants/styles";
 import Button from "../components/UI/Button";
 import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { storeExpense } from '../util/http';
 
 function ManageExpense({route, navigation}){
 
@@ -24,6 +25,7 @@ function ManageExpense({route, navigation}){
 
 
     function deleteExpenseHandler(){
+        
         expenseCtx.deleteExpense(editedExpenseId);
         navigation.goBack();
     }
@@ -33,13 +35,15 @@ function ManageExpense({route, navigation}){
         navigation.goBack();
     }
 
-    function confirmHandler(expenseData){
+    async function confirmHandler(expenseData){
         if(isEditing)
         {
             expenseCtx.updateExpense(editedExpenseId, expenseData);
         }
         else{
-            expenseCtx.addExpense(expenseData);
+            //Api firebase
+            const id = await storeExpense(expenseData);
+            expenseCtx.addExpense({...expenseData, id : id});
         }
         navigation.goBack();
     }
