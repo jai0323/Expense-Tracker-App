@@ -20,6 +20,7 @@ function RecentExpenses(){
          {
             const expenses = await  fetchExpense();
             expenseCtx.setExpenses(expenses);
+            setError(null);
          }
          catch(error){
             setError('Could not fetch expenses!');
@@ -43,13 +44,9 @@ function RecentExpenses(){
     return <LoadingOverlay />
  }
 
- function errorHandler(){
-    setError(null);
-    
- }
-
+ 
  if(error && !isFetching){
-    return <ErrorOverlay  message={error} onConfirm={errorHandler}/>
+    return <ErrorOverlay  message={error}/>
  }
 
  return <ExpensesOutput expenses={recentExpenses} 

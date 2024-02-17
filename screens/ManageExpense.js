@@ -7,6 +7,7 @@ import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 import { deleteExpenses, storeExpense, updateExpenses } from '../util/http';
 import LoadingOverlay from "../components/UI/LoadingOverlay";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 
 function ManageExpense({route, navigation}){
 
@@ -29,10 +30,15 @@ function ManageExpense({route, navigation}){
 
     async function deleteExpenseHandler(){
         setUpadateLoading(true);
-        
-        await deleteExpenses(editedExpenseId);
-        expenseCtx.deleteExpense(editedExpenseId);
-        navigation.goBack();
+        try{
+            await deleteExpenses(editedExpenseId);
+            expenseCtx.deleteExpense(editedExpenseId);
+            navigation.goBack();
+        }
+        catch(error){
+            setError("Could not delete expense - please try again later!")
+            setUpadateLoading(false);
+        }
     }
 
     function cancelHandler(){
@@ -42,19 +48,29 @@ function ManageExpense({route, navigation}){
 
     async function confirmHandler(expenseData){
         setUpadateLoading(true);
-        if(isEditing)
-        {
-            expenseCtx.updateExpense(editedExpenseId, expenseData);
-            await updateExpenses(editedExpenseId, expenseData); 
+        try{
+            if(isEditing)
+            {
+                expenseCtx.updateExpense(editedExpenseId, expenseData);
+                await updateExpenses(editedExpenseId, expenseData); 
+            }
+            else{
+                //Api firebase
+                const id = await storeExpense(expenseData);
+                expenseCtx.addExpense({...expenseData, id : id});
+            }
+            navigation.goBack();
         }
-        else{
-            //Api firebase
-            const id = await storeExpense(expenseData);
-            expenseCtx.addExpense({...expenseData, id : id});
+        catch(error){
+            setError("Could not save data - please try again later!")
+            setUpadateLoading(false);
         }
-        //setUpadateLoading(false);
-        navigation.goBack();
     }
+
+
+    if(error && !upadateLoading){
+        return <ErrorOverlay  message={error}/>
+     }
 
     if(upadateLoading)
     return <LoadingOverlay />
