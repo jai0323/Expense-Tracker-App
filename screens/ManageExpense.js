@@ -1,14 +1,17 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/styles";
 import Button from "../components/UI/Button";
 import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
-import { storeExpense } from '../util/http';
+import { deleteExpenses, storeExpense, updateExpenses } from '../util/http';
+import LoadingOverlay from "../components/UI/LoadingOverlay";
 
 function ManageExpense({route, navigation}){
 
+    const [error,setError] = useState();
+    const [upadateLoading,setUpadateLoading] = useState(false);
     const editedExpenseId = route.params?.expenseId;
     const isEditing = !!editedExpenseId;
     const expenseCtx = useContext(ExpensesContext);
@@ -24,8 +27,10 @@ function ManageExpense({route, navigation}){
     },[navigation,isEditing]);
 
 
-    function deleteExpenseHandler(){
+    async function deleteExpenseHandler(){
+        setUpadateLoading(true);
         
+        await deleteExpenses(editedExpenseId);
         expenseCtx.deleteExpense(editedExpenseId);
         navigation.goBack();
     }
@@ -36,17 +41,23 @@ function ManageExpense({route, navigation}){
     }
 
     async function confirmHandler(expenseData){
+        setUpadateLoading(true);
         if(isEditing)
         {
             expenseCtx.updateExpense(editedExpenseId, expenseData);
+            await updateExpenses(editedExpenseId, expenseData); 
         }
         else{
             //Api firebase
             const id = await storeExpense(expenseData);
             expenseCtx.addExpense({...expenseData, id : id});
         }
+        //setUpadateLoading(false);
         navigation.goBack();
     }
+
+    if(upadateLoading)
+    return <LoadingOverlay />
 
  return <View style={styles.container}>
     <ExpenseForm 
